@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
-
+import java.util.Scanner;
+import java.io.*;
 import javax.swing.*;
 
 public class Authenticate extends JFrame{
@@ -8,9 +9,10 @@ public class Authenticate extends JFrame{
     JPanel panel;
     JMenuBar mb;
     JMenu info, signUp;
-    JTextArea username;
-    JPasswordField password;
+    static JTextArea username;
+    static JPasswordField password;
     JButton login;
+    JCheckBox cbx;
     Authenticate(String title){
         super( title );                      
         setSize( 700, 600 );
@@ -34,14 +36,22 @@ public class Authenticate extends JFrame{
         
         //Login Button
         login = new JButton("Login");
-        login.setBounds(230, 260, 210, 40);
+        login.setBounds(230, 265, 210, 40);
         add(login);
 
         // Login Button Listener
         login.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-                new Dashboard("Dashboard");
+                try {
+                    if(checkUser()){
+                        setVisible(false);
+                        new Dashboard("Dashboard").setVisible(true);
+                    }else{
+                        JOptionPane.showMessageDialog(null, "Tumi dada nai!", "Username or Password Doesn't match", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
         
@@ -66,11 +76,54 @@ public class Authenticate extends JFrame{
         mb.add(signUp);
         mb.setBackground(Color.CYAN);
         setJMenuBar(mb);
+        
+        signUp.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+              setVisible(false);
+              new SignUp("Sign-Up").setVisible(true);
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+  
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+  
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+  
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
 
         // Main Frame
         setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         setLocationRelativeTo(null);  
         setLayout( null );   
         setVisible(false);    
+    }
+
+    public static boolean checkUser() throws FileNotFoundException{
+        Scanner scan = new Scanner(new File("Files/Register.txt"));
+        while(scan.hasNext()){
+            String line = scan.nextLine().toLowerCase().toString();
+            String[] data;
+            if(line.contains(username.getText())){
+                data = line.split(",");
+                int i = 0;
+                for(char c:password.getPassword()){
+                    if(data[1].charAt(i)!=c){
+                        return false;
+                    }
+                    i++;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }
